@@ -7,6 +7,7 @@ this is twofold: the internal API is unstable, and it is GPL.
 hgapi works for Mercurial < 1.9, and will instantly reflect any changes to the repositiry, unlike interfaces based on the CommandServer (http://mercurial.selenic.com/wiki/CommandServer) 
 
 So far, the API supports::
+
  hg init
  hg id
  hg add <file>
