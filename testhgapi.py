@@ -1,4 +1,4 @@
-import unittest
+import unittest, doctest
 import os, shutil, os.path
 import hgapi 
 
@@ -94,4 +94,7 @@ class TestHgAPI(unittest.TestCase):
         self.assertTrue(node in heads)
         
 if __name__ == "__main__":
+    res = doctest.testfile("README.rst")
+
     unittest.main()
+    
