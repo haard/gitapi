@@ -29,7 +29,6 @@ Example usage::
 
 License
 =======
-::
 
 Copyright (c) 2011, Fredrik Håård
 
