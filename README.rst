@@ -4,6 +4,8 @@ hgapi is a pure-Python API to Mercurial, that uses the command-line
 interface instead of the internal Mercurial API. The rationale for
 this is twofold: the internal API is unstable, and it is GPL.
 
+hgapi works for Mercurial < 1.9, and will instantly reflect any changes to the repositiry, unlike interfaces based on the CommandServer (http://mercurial.selenic.com/wiki/CommandServer) 
+
 So far, the API supports::
  hg init
  hg id
