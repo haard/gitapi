@@ -39,7 +39,14 @@ Example usage::
     u'Adding file.txt'
     >>> shutil.rmtree("test_hgapi")
 
+Installation
+============
 
+Make sure you have setuptools installed.
+
+Run::
+
+ python setup.py install
 
 License
 =======
