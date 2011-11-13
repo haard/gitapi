@@ -92,7 +92,33 @@ class TestHgAPI(unittest.TestCase):
         heads = self.repo.hg_heads()
         self.assertEquals(len(heads), 1)
         self.assertTrue(node in heads)
+
+    def test_070_Config(self):
+        with open("test/.hg/hgrc", "w") as hgrc:
+            hgrc.write("[test]\n" +
+                       "stuff.otherstuff = tsosvalue\n" +
+                       "stuff.debug = True\n" +
+                       "stuff.verbose = false\n" +
+                       "stuff.list = one two three\n" +
+                       "[ui]\n" +
+                       "username = testsson")
+        #re-read config
+        self.repo.read_config()     
+        self.assertEquals(self.repo.config('test', 'stuff.otherstuff'),
+                          "tsosvalue")
+        self.assertEquals(self.repo.config('ui', 'username'),
+                          "testsson")
+
+
+    def test_071_ConfigBool(self):
+        self.assertTrue(self.repo.configbool('test', 'stuff.debug'))
+        self.assertFalse(self.repo.configbool('test', 'stuff.verbose'))
         
+    def test_072_ConfigList(self):
+        self.assertTrue(self.repo.configlist('test', 'stuff.list'),
+                        ["one", "two", "three"])
+
+
 if __name__ == "__main__":
     res = doctest.testfile("README.rst")
 

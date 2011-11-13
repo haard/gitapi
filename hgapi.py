@@ -42,6 +42,7 @@ class Repo(object):
     def __init__(self, path):
         """Create a Repo object from the repository at path"""
         self.path = path
+        self.cfg = False
 
     def __getitem__(self, rev):
         """Get a Revision object for the revision identifed by rev"""
@@ -50,12 +51,12 @@ class Repo(object):
     def hg_command(self, *args):
         """Run a hg command in path and return the result.
         Throws on error."""    
-        proc = Popen(["hg", "--cwd", self.path] + list(args), stdout=PIPE, stderr=PIPE)
+        proc = Popen(["hg", "--cwd", self.path, "--encoding", "UTF-8"] + list(args), stdout=PIPE, stderr=PIPE)
         result = HgResult()
         result.out,result.err = [x.decode("utf-8") for x in  proc.communicate()]
         result.retcode = proc.returncode
         result.success = not result.retcode
-        if not result.success: 
+        if not result.success:
             cmd = (" ".join(["hg", "--cwd", self.path] + list(args)))
             raise Exception("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" % (
                     cmd,result.err, result.out, result.retcode))
@@ -113,3 +114,53 @@ class Repo(object):
         """Get the identified revision as a Revision object"""
         return Revision(self.hg_log(identifier))
 
+    def read_config(self):
+        """Read the configuration as seen with 'hg showconfig'
+        Is called by __init__ - only needs to be called explicitly
+        to reflect changes made since instantiation"""
+        res = self.hg_command("showconfig")
+        cfg = {}
+        for row in res.out.split("\n"):
+            section, ign, value = row.partition("=")
+            main, ign, sub = section.partition(".")
+            sect_cfg = cfg.setdefault(main, {})
+            sect_cfg[sub] = value.strip()
+        self.cfg = cfg
+        return cfg
+
+
+    def config(self, section, key):
+        """Return the value of a configuration variable"""
+        if not self.cfg: 
+            self.cfg = self.read_config()
+        return self.cfg.get(section, {}).get(key, None)
+    
+    def configbool(self, section, key):
+        """Return a config value as a boolean value.
+        Empty values, the string 'false' (any capitalization),
+        and '0' are considered False, anything else True"""
+        if not self.cfg: 
+            self.cfg = self.read_config()
+        value = self.cfg.get(section, {}).get(key, None)
+        if not value: 
+            return False
+        if (value == "0" 
+            or value.upper() == "FALSE"
+            or value.upper() == "None"): 
+            return False
+        return True
+
+    def configlist(self, section, key):
+        """Return a config value as a list; will try to create a list
+        delimited by commas, or whitespace if no commas are present"""
+        if not self.cfg: 
+            self.cfg = self.read_config()
+        value = self.cfg.get(section, {}).get(key, None)
+        if not value: 
+            return []
+        if value.count(","):
+            return value.split(",")
+        else:
+            return value.split()
+        
+        
