@@ -7,12 +7,6 @@ except: #python 3
 import re
 import os.path
 import json #for reading logs
-out = print
-err = print
-
-class HgResult(object):
-    """Empty class representing command result"""
-    pass
 
 class Revision(object):
     """A representation of a revision.
@@ -52,29 +46,28 @@ class Repo(object):
         """Run a hg command in path and return the result.
         Throws on error."""    
         proc = Popen(["hg", "--cwd", self.path, "--encoding", "UTF-8"] + list(args), stdout=PIPE, stderr=PIPE)
-        result = HgResult()
-        result.out,result.err = [x.decode("utf-8") for x in  proc.communicate()]
-        result.retcode = proc.returncode
-        result.success = not result.retcode
-        if not result.success:
+
+        out, err = [x.decode("utf-8") for x in  proc.communicate()]
+
+        if proc.returncode:
             cmd = (" ".join(["hg", "--cwd", self.path] + list(args)))
-            raise Exception("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" % (
-                    cmd,result.err, result.out, result.retcode))
-        return result
+            raise Exception("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" 
+                            % (cmd,err,out,proc.returncode))
+        return out
 
     def hg_init(self):
         """Initialize a new repo"""
-        res = self.hg_command("init")
+        self.hg_command("init")
 
     def hg_id(self):
         """Get the output of the hg id command (truncated node)"""
         res = self.hg_command("id", "-i")
-        return res.out.strip("\n +")
+        return res.strip("\n +")
         
     def hg_rev(self):
         """Get the revision number of the current revision"""
         res = self.hg_command("id", "-n")
-        str_rev = res.out.strip("\n +")
+        str_rev = res.strip("\n +")
         return int(str_rev)
 
     def hg_add(self, filepath):
@@ -88,27 +81,27 @@ class Repo(object):
     def hg_heads(self):
         """Gets a list with the node id:s of all open heads"""
         res = self.hg_command("heads","--template", "{node}\n")
-        return [head for head in res.out.split("\n") if head]
+        return [head for head in res.split("\n") if head]
         
     def hg_node(self):
         """Get the full node id of the current revision"""
         res = self.hg_command("log", "-r", self.hg_id(), "--template", "{node}")
-        return res.out.strip()
+        return res.strip()
 
     def hg_commit(self, message, user=None, files=["."], close_branch=False):
         """Commit changes to the repository."""
         userspec = "-u" + user if user else ""
         close = "--close-branch" if close_branch else ""
-        res = self.hg_command("commit", "-m", message, close, 
-                              userspec, *files)
+        self.hg_command("commit", "-m", message, close, 
+                        userspec, *files)
 
     log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
 
     def hg_log(self, identifier):
         """Get the identified revision as a json string"""
-        res = self.hg_command("log", "-r", str(identifier), 
+        return self.hg_command("log", "-r", str(identifier), 
                               "--template", self.log_tpl)
-        return res.out
+        
 
     def revision(self, identifier):
         """Get the identified revision as a Revision object"""
@@ -120,7 +113,7 @@ class Repo(object):
         to reflect changes made since instantiation"""
         res = self.hg_command("showconfig")
         cfg = {}
-        for row in res.out.split("\n"):
+        for row in res.split("\n"):
             section, ign, value = row.partition("=")
             main, ign, sub = section.partition(".")
             sect_cfg = cfg.setdefault(main, {})
