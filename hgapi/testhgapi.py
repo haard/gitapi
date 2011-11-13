@@ -121,6 +121,5 @@ class TestHgAPI(unittest.TestCase):
 
 if __name__ == "__main__":
     res = doctest.testfile("README.rst")
-
     unittest.main()
     
