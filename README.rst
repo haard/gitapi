@@ -43,9 +43,16 @@ Example usage::
 Installation
 ============
 
-Make sure you have setuptools installed.
+Easiest is easy_install or pip from PyPy::
 
-Run::
+ pip install hgapi
+
+or::
+
+ easy_install hgapi
+
+Otherwise, download the source, make sure you have setuptools
+installed, and then run::
 
  python setup.py install
 
