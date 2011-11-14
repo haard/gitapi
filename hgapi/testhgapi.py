@@ -10,7 +10,11 @@ class TestHgAPI(unittest.TestCase):
     repo = hgapi.Repo("./test")
     
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
+        #Patch Python 3
+        if hasattr(cls, "assertEqual"):
+            setattr(cls, "assertEquals", cls.assertEqual)
+            setattr(cls, "assertNotEquals", cls.assertNotEqual)
         if os.path.exists("./test"):
             shutil.rmtree("./test")
         os.mkdir("./test")

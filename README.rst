@@ -32,11 +32,12 @@ Example usage::
     >>> os.mkdir("./test_hgapi")
     >>> repo = hgapi.Repo("test_hgapi")
     >>> repo.hg_init()
-    >>> open("test_hgapi/file.txt", "w").write("stuff")
+    >>> with open("test_hgapi/file.txt", "w") as target:
+    ...  w = target.write("stuff")
     >>> repo.hg_add("file.txt")
     >>> repo.hg_commit("Adding file.txt", user="me")
-    >>> repo['tip'].desc
-    u'Adding file.txt'
+    >>> str(repo['tip'].desc)
+    'Adding file.txt'
     >>> shutil.rmtree("test_hgapi")
 
 Installation
