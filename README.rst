@@ -5,7 +5,7 @@ interface instead of the internal Mercurial API. The rationale for
 this is twofold: the internal API is unstable, and it is GPL.
 
 hgapi works for Mercurial < 1.9, and will instantly reflect any
-changes to the repositiry, unlike interfaces based on the
+changes to the repository, unlike interfaces based on the
 CommandServer (http://mercurial.selenic.com/wiki/CommandServer). It
 also has a really permissive license (do whatever you want, don't
 blame me).
