@@ -95,7 +95,8 @@ class Repo(object):
         self.hg_command("commit", "-m", message, close, 
                         userspec, *files)
 
-    log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
+    log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author|urlescape}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
+
 
     def hg_log(self, identifier=None, limit=None, template=None):
 

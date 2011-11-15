@@ -122,6 +122,17 @@ class TestHgAPI(unittest.TestCase):
         self.assertTrue(self.repo.configlist('test', 'stuff.list'),
                         ["one", "two", "three"])
 
+    def test_080_LogBreakage(self):
+        """Some log messages could possibly break"""
+        #write some more to file
+        with open("test/file.txt", "w+") as out:
+            out.write("stuff and, more stuff")
+
+        #Commit and check that changes have been made
+        self.repo.hg_commit("}", user="},desc=\"test")
+        self.assertEquals(self.repo["tip"].desc, "}")
+        self.assertEquals(self.repo["tip"].author, "},desc=\"test")
+  
 
 if __name__ == "__main__":
     res = doctest.testfile("../README.rst")
