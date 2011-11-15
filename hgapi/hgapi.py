@@ -97,15 +97,21 @@ class Repo(object):
 
     log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
 
-    def hg_log(self, identifier):
-        """Get the identified revision as a json string"""
-        return self.hg_command("log", "-r", str(identifier), 
-                              "--template", self.log_tpl)
-        
+    def hg_log(self, identifier=None, limit=None, template=None):
+
+        cmds = ["log"]
+        if identifier: cmds += ['-r', str(identifier)]
+        if limit: cmds += ['-l', str(limit)]
+        if template: cmds += ['--template', str(template)]
+
+        return self.hg_command(*cmds)
 
     def revision(self, identifier):
         """Get the identified revision as a Revision object"""
-        return Revision(self.hg_log(identifier))
+        out = self.hg_log(identifier=str(identifier), 
+                          template=self.log_tpl)
+        
+        return Revision(out)
 
     def read_config(self):
         """Read the configuration as seen with 'hg showconfig'
