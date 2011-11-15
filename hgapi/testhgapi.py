@@ -123,7 +123,8 @@ class TestHgAPI(unittest.TestCase):
                         ["one", "two", "three"])
 
     def test_080_LogBreakage(self):
-        """Some log messages could possibly break"""
+        """Some log messages/users could possibly break 
+        the revision parsing"""
         #write some more to file
         with open("test/file.txt", "w+") as out:
             out.write("stuff and, more stuff")
