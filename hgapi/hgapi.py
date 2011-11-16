@@ -33,10 +33,11 @@ class Revision(object):
 
 class Repo(object):
     """A representation of a Mercurial repository"""
-    def __init__(self, path):
+    def __init__(self, path, user=None):
         """Create a Repo object from the repository at path"""
         self.path = path
         self.cfg = False
+        self.user = user
 
     def __getitem__(self, rev):
         """Get a Revision object for the revision identifed by rev"""
@@ -90,7 +91,7 @@ class Repo(object):
 
     def hg_commit(self, message, user=None, files=["."], close_branch=False):
         """Commit changes to the repository."""
-        userspec = "-u" + user if user else ""
+        userspec = "-u" + user if user else "-u" + self.user if self.user else ""
         close = "--close-branch" if close_branch else ""
         self.hg_command("commit", "-m", message, close, 
                         userspec, *files)
