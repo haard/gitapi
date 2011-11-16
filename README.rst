@@ -59,7 +59,10 @@ installed, and then run::
 License
 =======
 
-Copyright (c) 2011, Fredrik Håård
+Copyright (c) 2011, Fredrik Håård 
+
+Do whatever you want, don't blame me. You may also use this software
+as licensed under the MIT or BSD licenses, or the more permissive license below:
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
