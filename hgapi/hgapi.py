@@ -25,7 +25,7 @@ class Revision(object):
         if not self.parents:
             self.parents = [int(self.rev)-1]
         else:
-            self.parents = [int(p) for p in self.parents.split()]
+            self.parents = [int(p.split(':')[0]) for p in self.parents.split()]
 
     def __eq__(self, other):
         """Returns true if self.node == other.node"""
