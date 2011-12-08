@@ -22,7 +22,7 @@ class Revision(object):
         for key in rev.keys():
             self.__setattr__(key, unquote(rev[key]))
         self.rev = int(self.rev)
-        if not hasattr(self, "parent"):
+        if not self.parents:
             self.parents = [int(self.rev)-1]
         else:
             self.parents = [int(p) for p in self.parents.split()]
