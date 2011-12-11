@@ -1,3 +1,4 @@
+﻿# -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 from subprocess import Popen, STDOUT, PIPE
 try:
@@ -95,22 +96,21 @@ class Repo(object):
         self.hg_command("commit", "-m", message, close, 
                         userspec, *files)
 
-    log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author|urlescape}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
-
-
     def hg_log(self, identifier=None, limit=None, template=None):
-
+        """Get repositiory log"""
         cmds = ["log"]
         if identifier: cmds += ['-r', str(identifier)]
         if limit: cmds += ['-l', str(limit)]
         if template: cmds += ['--template', str(template)]
 
         return self.hg_command(*cmds)
+        
+    rev_log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author|urlescape}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
 
     def revision(self, identifier):
         """Get the identified revision as a Revision object"""
         out = self.hg_log(identifier=str(identifier), 
-                          template=self.log_tpl)
+                          template=self.rev_log_tpl)
         
         return Revision(out)
 

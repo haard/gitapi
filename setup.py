@@ -12,7 +12,7 @@ setup(
     author = u"Fredrik Håård",
     author_email = "fredrik@haard.se",
     description = "Python API to Mercurial using the command-line interface",
-    license = "MIT or BSD or WTF",
+    license = "Do whatever you want, don't blame me",
     keywords = "mercurial api",
     url = "https://bitbucket.org/haard/hgapi",   # project home page, if any
     long_description = """
