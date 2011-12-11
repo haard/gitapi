@@ -28,17 +28,13 @@ You also have access to the configuration (config, configbool,
 configlist) just as in the internal Mercurial API.
 
 Example usage::
-    >>> import hgapi, shutil, os
-    >>> os.mkdir("./test_hgapi")
-    >>> repo = hgapi.Repo("test_hgapi")
+    >>> import hgapi
+    >>> repo = hgapi.Repo("test_hgapi") #existing folder
     >>> repo.hg_init()
-    >>> with open("test_hgapi/file.txt", "w") as target:
-    ...  w = target.write("stuff")
-    >>> repo.hg_add("file.txt")
+    >>> repo.hg_add("file.txt") #already created but not added file
     >>> repo.hg_commit("Adding file.txt", user="me")
     >>> str(repo['tip'].desc)
     'Adding file.txt'
-    >>> shutil.rmtree("test_hgapi")
 
 Installation
 ============

@@ -134,8 +134,14 @@ class TestHgAPI(unittest.TestCase):
         self.assertEquals(self.repo["tip"].desc, "}")
         self.assertEquals(self.repo["tip"].author, "},desc=\"test")
   
+def test_doc():
+    os.mkdir("./test_hgapi")
+    with open("test_hgapi/file.txt", "w") as target:
+        w = target.write("stuff")
+    res = doctest.testfile("../README.rst")
+    shutil.rmtree("test_hgapi")
 
 if __name__ == "__main__":
-    res = doctest.testfile("../README.rst")
+    test_doc()
     unittest.main()
     
