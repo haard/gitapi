@@ -23,10 +23,10 @@ class Revision(object):
         for key in rev.keys():
             self.__setattr__(key, unquote(rev[key]))
         self.rev = int(self.rev)
-        if not hasattr(self, "parent"):
+        if not self.parents:
             self.parents = [int(self.rev)-1]
         else:
-            self.parents = [int(p) for p in self.parents.split()]
+            self.parents = [int(p.split(':')[0]) for p in self.parents.split()]
 
     def __eq__(self, other):
         """Returns true if self.node == other.node"""
@@ -34,10 +34,11 @@ class Revision(object):
 
 class Repo(object):
     """A representation of a Mercurial repository"""
-    def __init__(self, path):
+    def __init__(self, path, user=None):
         """Create a Repo object from the repository at path"""
         self.path = path
         self.cfg = False
+        self.user = user
 
     def __getitem__(self, rev):
         """Get a Revision object for the revision identifed by rev"""
@@ -91,7 +92,7 @@ class Repo(object):
 
     def hg_commit(self, message, user=None, files=["."], close_branch=False):
         """Commit changes to the repository."""
-        userspec = "-u" + user if user else ""
+        userspec = "-u" + user if user else "-u" + self.user if self.user else ""
         close = "--close-branch" if close_branch else ""
         self.hg_command("commit", "-m", message, close, 
                         userspec, *files)

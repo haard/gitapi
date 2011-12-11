@@ -7,7 +7,7 @@ class TestHgAPI(unittest.TestCase):
     Uses and wipes subfolder named 'test'
     Tests are dependant on each other; named test_<number>_name for sorting
     """
-    repo = hgapi.Repo("./test")
+    repo = hgapi.Repo("./test", user="testuser")
     
     @classmethod
     def setUpClass(cls):
