@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 from subprocess import Popen, STDOUT, PIPE
 try:
@@ -97,13 +97,15 @@ class Repo(object):
         self.hg_command("commit", "-m", message, close, 
                         userspec, *files)
 
-    def hg_log(self, identifier=None, limit=None, template=None):
+    def hg_log(self, identifier=None, limit=None, template=None, **kwargs):
         """Get repositiory log"""
         cmds = ["log"]
         if identifier: cmds += ['-r', str(identifier)]
         if limit: cmds += ['-l', str(limit)]
         if template: cmds += ['--template', str(template)]
-
+        if kwargs:
+            for key in kwargs:
+                cmds += [key, kwargs[key]]
         return self.hg_command(*cmds)
         
     rev_log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author|urlescape}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
