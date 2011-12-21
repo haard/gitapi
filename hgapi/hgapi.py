@@ -113,6 +113,15 @@ class Repo(object):
         return self.hg_command(*cmds)
         
     def hg_status(self):
+        """Get repository status.
+        Returns a dict containing a *change char* -> *file list* mapping, where 
+        change char is in A, M, R, !, ?
+
+        Example - added one.txt, modified a_folder/two.txt and three.txt: 
+            {'A': ['one.txt'], 'M': ['a_folder/two.txt', 'three.txt']}
+
+        Note that empty mappings are not created.
+        """
         cmds = ['status']
         out = self.hg_command(*cmds).strip()
         if not out: return {}
