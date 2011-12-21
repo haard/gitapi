@@ -7,9 +7,7 @@ setup(
     version = "1.1.0c1",
     packages = ['hgapi'],
     test_suite = "hgapi.testhgapi.TestHgAPI",
-
-    # metadata
-    author = u"Fredrik Håård",
+    author = "Fredrik Håård",
     author_email = "fredrik@haard.se",
     description = "Python API to Mercurial using the command-line interface",
     license = "Do whatever you want, don't blame me",
