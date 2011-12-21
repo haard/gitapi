@@ -118,16 +118,17 @@ class Repo(object):
         change char is in A, M, R, !, ?
 
         Example - added one.txt, modified a_folder/two.txt and three.txt: 
-            {'A': ['one.txt'], 'M': ['a_folder/two.txt', 'three.txt']}
-
-        Note that empty mappings are not created.
+            {'A': ['one.txt'], 'M': ['a_folder/two.txt', 'three.txt'],
+            '!': [], '?': [], 'R': []}
         """
         cmds = ['status']
         out = self.hg_command(*cmds).strip()
-        if not out: return {}
+        #default empty set
+        changes = {'A': [], 'M': [], '!': [], '?': [], 'R': []}
+        if not out: return changes
         lines = out.split("\n")
         status_split = re.compile("^(.) (.*)$")
-        changes = {}
+
         for change, path in [status_split.match(x).groups() for x in lines]:
             changes.setdefault(change, []).append(path)
         return changes

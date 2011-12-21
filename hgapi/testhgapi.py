@@ -140,26 +140,33 @@ class TestHgAPI(unittest.TestCase):
         with open("test/file.txt", "a") as out:
             out.write("stuff stuff stuff")
         status = self.repo.hg_status()
-        self.assertEquals(status, {'M': ['file.txt']})
-
+        self.assertEquals(status, 
+                          {'A': [], 'M': ['file.txt'], '!': [], 
+                           '?': [], 'R': []})
+        
     def test_100_CleanStatus(self):
         #commit file created in 090
         self.repo.hg_commit("Comitting changes", user="test")
         #Assert status is empty
-        self.assertEquals(self.repo.hg_status(), {})
+        self.assertEquals(self.repo.hg_status(), 
+                          {'A': [], 'M': [], '!': [], '?': [], 'R': []})
 
     def test_110_UntrackedStatus(self):
         #Create a new file
         with open("test/file2.txt", "w") as out:
             out.write("stuff stuff stuff")
         status = self.repo.hg_status()
-        self.assertEquals(status, {'?': ['file2.txt']})
+        self.assertEquals(status, 
+                          {'A': [], 'M': [], '!': [], 
+                           '?': ['file2.txt'], 'R': []})
 
     def test_120_AddedStatus(self):
         #Add file created in 110
         self.repo.hg_add("file2.txt")
         status = self.repo.hg_status()
-        self.assertEquals(status, {'A': ['file2.txt']})
+        self.assertEquals(status, 
+                          {'A': ['file2.txt'], 'M': [], '!': [], 
+                           '?': [], 'R': []})
 
     def test_130_MissingStatus(self):
         #Commit file created in 120
@@ -167,13 +174,17 @@ class TestHgAPI(unittest.TestCase):
         import os
         os.unlink("test/file2.txt")
         status = self.repo.hg_status()
-        self.assertEquals(status, {'!': ['file2.txt']})
+        self.assertEquals(status, 
+                          {'A': [], 'M': [], '!': ['file2.txt'], 
+                           '?': [], 'R': []})
 
     def test_140_RemovedStatus(self):
         #Remove file from repo
         self.repo.hg_remove("file2.txt")
         status = self.repo.hg_status()
-        self.assertEquals(status, {'R': ['file2.txt']})
+        self.assertEquals(status, 
+                          {'A': [], 'M': [], '!': [], 
+                           '?': [], 'R': ['file2.txt']})
 
 
 def test_doc():
