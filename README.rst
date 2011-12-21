@@ -23,6 +23,8 @@ So far, the API supports::
  hg update <rev>
  hg heads
  hg log
+ hg remove
+ hg status
 
 You also have access to the configuration (config, configbool,
 configlist) just as in the internal Mercurial API.
