@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import unittest, doctest
 import os, shutil, os.path
 import hgapi 

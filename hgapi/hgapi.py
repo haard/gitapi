@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, unicode_literals
+from __future__ import print_function, unicode_literals, with_statement
 from subprocess import Popen, STDOUT, PIPE
 try:
     from urllib import unquote
@@ -7,7 +7,11 @@ except: #python 3
     from urllib.parse import unquote
 import re
 import os.path
-import json #for reading logs
+try:
+    import json #for reading logs
+except:
+    import simplejson as json
+
 
 class Revision(object):
     """A representation of a revision.
