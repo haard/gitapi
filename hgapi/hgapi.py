@@ -76,6 +76,10 @@ class Repo(object):
         """Add a file to the repo"""
         self.hg_command("add", filepath)
 
+    def hg_remove(self, filepath):
+        """Remove a file from the repo"""
+        self.hg_command("remove", filepath)
+
     def hg_update(self, reference):
         """Update to the revision indetified by reference"""
         self.hg_command("update", str(reference))
@@ -107,6 +111,17 @@ class Repo(object):
             for key in kwargs:
                 cmds += [key, kwargs[key]]
         return self.hg_command(*cmds)
+        
+    def hg_status(self):
+        cmds = ['status']
+        out = self.hg_command(*cmds).strip()
+        if not out: return {}
+        lines = out.split("\n")
+        status_split = re.compile("^(.) (.*)$")
+        changes = {}
+        for change, path in [status_split.match(x).groups() for x in lines]:
+            changes.setdefault(change, []).append(path)
+        return changes
         
     rev_log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author|urlescape}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
 

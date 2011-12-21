@@ -134,6 +134,48 @@ class TestHgAPI(unittest.TestCase):
         self.assertEquals(self.repo["tip"].desc, "}")
         self.assertEquals(self.repo["tip"].author, "},desc=\"test")
   
+
+    def test_090_ModifiedStatus(self):
+        #write some more to file
+        with open("test/file.txt", "a") as out:
+            out.write("stuff stuff stuff")
+        status = self.repo.hg_status()
+        self.assertEquals(status, {'M': ['file.txt']})
+
+    def test_100_CleanStatus(self):
+        #commit file created in 090
+        self.repo.hg_commit("Comitting changes", user="test")
+        #Assert status is empty
+        self.assertEquals(self.repo.hg_status(), {})
+
+    def test_110_UntrackedStatus(self):
+        #Create a new file
+        with open("test/file2.txt", "w") as out:
+            out.write("stuff stuff stuff")
+        status = self.repo.hg_status()
+        self.assertEquals(status, {'?': ['file2.txt']})
+
+    def test_120_AddedStatus(self):
+        #Add file created in 110
+        self.repo.hg_add("file2.txt")
+        status = self.repo.hg_status()
+        self.assertEquals(status, {'A': ['file2.txt']})
+
+    def test_130_MissingStatus(self):
+        #Commit file created in 120
+        self.repo.hg_commit("Added file")
+        import os
+        os.unlink("test/file2.txt")
+        status = self.repo.hg_status()
+        self.assertEquals(status, {'!': ['file2.txt']})
+
+    def test_140_RemovedStatus(self):
+        #Remove file from repo
+        self.repo.hg_remove("file2.txt")
+        status = self.repo.hg_status()
+        self.assertEquals(status, {'R': ['file2.txt']})
+
+
 def test_doc():
     os.mkdir("./test_hgapi")
     with open("test_hgapi/file.txt", "w") as target:
