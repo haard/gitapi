@@ -6,4 +6,4 @@ hgapi Package
 
 .. automodule:: hgapi.hgapi
     :members:
-    :show-inheritance:
+

@@ -15,10 +15,11 @@ except:
 
 class Revision(object):
     """A representation of a revision.
-    Available fields are:
-        node, rev, author, branch, parents, date, tags, desc
-    A Revision object is equal to any other object 
-    with the same value for node
+    Available fields are::
+
+      node, rev, author, branch, parents, date, tags, desc
+
+    A Revision object is equal to any other object with the same value for node
     """
     def __init__(self, json_log):
         """Create a Revision object from a JSON representation"""
@@ -119,11 +120,14 @@ class Repo(object):
     def hg_status(self):
         """Get repository status.
         Returns a dict containing a *change char* -> *file list* mapping, where 
-        change char is in A, M, R, !, ?
+        change char is in::
 
-        Example - added one.txt, modified a_folder/two.txt and three.txt: 
-            {'A': ['one.txt'], 'M': ['a_folder/two.txt', 'three.txt'],
-            '!': [], '?': [], 'R': []}
+         A, M, R, !, ?
+
+        Example - added one.txt, modified a_folder/two.txt and three.txt::
+
+         {'A': ['one.txt'], 'M': ['a_folder/two.txt', 'three.txt'],
+         '!': [], '?': [], 'R': []}
         """
         cmds = ['status']
         out = self.hg_command(*cmds).strip()
