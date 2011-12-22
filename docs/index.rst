@@ -1,10 +1,10 @@
-.. . documentation master file, created by
-   sphinx-quickstart on Thu Dec 22 11:13:32 2011.
+.. hgapi documentation master file, created by
+   sphinx-quickstart on Thu Dec 22 11:19:07 2011.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to .'s documentation!
-=============================
+Welcome to hgapi's documentation!
+=================================
 
 Contents:
 
@@ -12,7 +12,6 @@ Contents:
    :maxdepth: 4
 
    hgapi
-   setup
 
 
 Indices and tables

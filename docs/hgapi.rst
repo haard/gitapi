@@ -4,7 +4,7 @@ hgapi Package
 :mod:`hgapi` Package
 --------------------
 
-.. automodule:: hgapi
+.. automodule:: hgapi.__init__
     :members:
     :undoc-members:
     :show-inheritance:
