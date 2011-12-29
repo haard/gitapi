@@ -25,7 +25,7 @@ So far, the API supports::
  hg log
  hg remove
  hg status
- hg merge<
+ hg merge (fails on conflict)
 
 You also have access to the configuration (config, configbool,
 configlist) just as in the internal Mercurial API.
