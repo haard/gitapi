@@ -187,15 +187,48 @@ class TestHgAPI(unittest.TestCase):
                           {'A': [], 'M': [], '!': [], 
                            '?': [], 'R': ['file2.txt']})
 
+    def test_150_ForkAndMerge(self):
+        #Store this version
+        node = self.repo.hg_node()
+
+        self.repo.hg_update(4, clean=True)
+        with open("test/file3.txt", "w") as out:
+            out.write("this is more stuff")
+
+        #creates new head
+        self.repo.hg_add("file3.txt")
+        self.repo.hg_commit("adding head", user="test")
+
+        heads = self.repo.hg_heads()
+        self.assertEquals(len(heads), 2)
+        self.assertTrue(node in heads)
+        self.assertTrue(self.repo.hg_node() in heads)
+
+        #merge the changes
+        self.repo.hg_merge(node)
+        self.repo.hg_commit("merge")
+        
+        #Check that there's only one head remaining
+        heads = self.repo.hg_heads()
+        self.assertEquals(len(heads), 1)
+
 
 def test_doc():
+    #Prepare for doctest
     os.mkdir("./test_hgapi")
     with open("test_hgapi/file.txt", "w") as target:
         w = target.write("stuff")
-    res = doctest.testfile("../README.rst")
-    shutil.rmtree("test_hgapi")
+    try:
+        #Run doctest
+        res = doctest.testfile("../README.rst")
+    finally:
+        #Cleanup
+        shutil.rmtree("test_hgapi")
 
 if __name__ == "__main__":
-    test_doc()
-    unittest.main()
+    import sys
+    try:
+        test_doc()
+    finally:
+        unittest.main()
     

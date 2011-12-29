@@ -85,21 +85,27 @@ class Repo(object):
         """Remove a file from the repo"""
         self.hg_command("remove", filepath)
 
-    def hg_update(self, reference):
+    def hg_update(self, reference, clean=False):
         """Update to the revision indetified by reference"""
-        self.hg_command("update", str(reference))
+        cmd = ["update", str(reference)]
+        if clean: cmd.append("--clean")
+        self.hg_command(*cmd)
 
     def hg_heads(self):
         """Gets a list with the node id:s of all open heads"""
         res = self.hg_command("heads","--template", "{node}\n")
         return [head for head in res.split("\n") if head]
+
+    def hg_merge(self, reference):
+        """Merge reference to current"""
+        self.hg_command("merge", reference)
         
     def hg_node(self):
         """Get the full node id of the current revision"""
         res = self.hg_command("log", "-r", self.hg_id(), "--template", "{node}")
         return res.strip()
 
-    def hg_commit(self, message, user=None, files=["."], close_branch=False):
+    def hg_commit(self, message, user=None, files=[], close_branch=False):
         """Commit changes to the repository."""
         userspec = "-u" + user if user else "-u" + self.user if self.user else ""
         close = "--close-branch" if close_branch else ""
