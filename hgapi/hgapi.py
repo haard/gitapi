@@ -100,6 +100,15 @@ class Repo(object):
         """Merge reference to current"""
         self.hg_command("merge", reference)
         
+    def hg_revert(self, all=False, *files):
+        """Revert repository"""
+        
+        if all:
+            cmd = ["revert", "--all"]
+        else:
+            cmd = ["revert"] + list(files)
+        self.hg_command(*cmd)
+
     def hg_node(self):
         """Get the full node id of the current revision"""
         res = self.hg_command("log", "-r", self.hg_id(), "--template", "{node}")
@@ -123,7 +132,7 @@ class Repo(object):
                 cmds += [key, kwargs[key]]
         return self.hg_command(*cmds)
         
-    def hg_status(self):
+    def hg_status(self, empty=False):
         """Get repository status.
         Returns a dict containing a *change char* -> *file list* mapping, where 
         change char is in::
@@ -134,11 +143,16 @@ class Repo(object):
 
          {'A': ['one.txt'], 'M': ['a_folder/two.txt', 'three.txt'],
          '!': [], '?': [], 'R': []}
+
+        If empty is set to non-False value, don't add empty lists
         """
         cmds = ['status']
         out = self.hg_command(*cmds).strip()
         #default empty set
-        changes = {'A': [], 'M': [], '!': [], '?': [], 'R': []}
+        if empty:
+            changes = {}
+        else:
+            changes = {'A': [], 'M': [], '!': [], '?': [], 'R': []}
         if not out: return changes
         lines = out.split("\n")
         status_split = re.compile("^(.) (.*)$")

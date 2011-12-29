@@ -187,6 +187,11 @@ class TestHgAPI(unittest.TestCase):
                           {'A': [], 'M': [], '!': [], 
                            '?': [], 'R': ['file2.txt']})
 
+    def test_140_EmptyStatus(self):
+        self.repo.hg_revert(all=True)
+        status = self.repo.hg_status(empty=True)
+        self.assertEquals(status, {})
+
     def test_150_ForkAndMerge(self):
         #Store this version
         node = self.repo.hg_node()
@@ -211,7 +216,6 @@ class TestHgAPI(unittest.TestCase):
         #Check that there's only one head remaining
         heads = self.repo.hg_heads()
         self.assertEquals(len(heads), 1)
-
 
 def test_doc():
     #Prepare for doctest
