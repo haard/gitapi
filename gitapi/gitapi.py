@@ -23,15 +23,16 @@ class Revision(object):
     """
     def __init__(self, json_log):
         """Create a Revision object from a JSON representation"""
+        print(json_log)
         rev = json.loads(json_log)
         
         for key in rev.keys():
             self.__setattr__(key, unquote(rev[key]))
-        self.rev = int(self.rev)
+   
         if not self.parents:
-            self.parents = [int(self.rev)-1]
+            self.parents = []
         else:
-            self.parents = [int(p.split(':')[0]) for p in self.parents.split()]
+            self.parents = self.parents.split()
 
     def __eq__(self, other):
         """Returns true if self.node == other.node"""
@@ -49,90 +50,91 @@ class Repo(object):
         """Get a Revision object for the revision identifed by rev"""
         return self.revision(rev)
 
-    def hg_command(self, *args):
-        """Run a hg command in path and return the result.
+    def git_command(self, *args):
+        """Run a git command in path and return the result.
         Throws on error."""    
-        proc = Popen(["hg", "--cwd", self.path, "--encoding", "UTF-8"] + list(args), stdout=PIPE, stderr=PIPE)
+
+        allargs = ["--git-dir", self.path+"/.git", "--work-tree", self.path] + list(args)
+        proc = Popen(["git"] + allargs, stdout=PIPE, stderr=PIPE)
+        print("Executed " + " ".join(allargs))
 
         out, err = [x.decode("utf-8") for x in  proc.communicate()]
 
         if proc.returncode:
-            cmd = (" ".join(["hg", "--cwd", self.path] + list(args)))
+            cmd = "git " + " ".join(allargs)
             raise Exception("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" 
                             % (cmd,err,out,proc.returncode))
         return out
 
-    def hg_init(self):
+    def git_init(self):
         """Initialize a new repo"""
-        self.hg_command("init")
+        self.git_command("init")
 
-    def hg_id(self):
-        """Get the output of the hg id command (truncated node)"""
-        res = self.hg_command("id", "-i")
+    def git_id(self):
+        """Get the output of the git id command (truncated node)"""
+        res = self.git_command("log","--pretty=format:%H", "-n", "1")
         return res.strip("\n +")
         
-    def hg_rev(self):
-        """Get the revision number of the current revision"""
-        res = self.hg_command("id", "-n")
-        str_rev = res.strip("\n +")
-        return int(str_rev)
-
-    def hg_add(self, filepath):
+    def git_add(self, filepath):
         """Add a file to the repo"""
-        self.hg_command("add", filepath)
+        self.git_command("add", filepath)
 
-    def hg_remove(self, filepath):
+    def git_remove(self, filepath):
         """Remove a file from the repo"""
-        self.hg_command("remove", filepath)
+        self.git_command("rm", filepath)
 
-    def hg_update(self, reference, clean=False):
+    def git_checkout(self, reference, clean=False):
         """Update to the revision indetified by reference"""
-        cmd = ["update", str(reference)]
-        if clean: cmd.append("--clean")
-        self.hg_command(*cmd)
+        cmd = ["checkout", str(reference)]
+        self.git_command(*cmd)
 
-    def hg_heads(self):
-        """Gets a list with the node id:s of all open heads"""
-        res = self.hg_command("heads","--template", "{node}\n")
-        return [head for head in res.split("\n") if head]
+    def git_branches(self):
+        """Gets a list with the names of all branches"""
+        res = self.git_command("branch")
+        return [head.strip(" *") for head in res.split("\n") if head]
 
-    def hg_merge(self, reference):
+    def git_branch(self, name, start="HEAD"):
+        """Create the branch named 'name'"""
+        return self.git_command("branch", name, start)
+
+
+
+    def git_merge(self, reference):
         """Merge reference to current"""
-        self.hg_command("merge", reference)
+        self.git_command("merge", reference)
         
-    def hg_revert(self, all=False, *files):
+    def git_reset(self, hard=True, *files):
         """Revert repository"""
         
-        if all:
-            cmd = ["revert", "--all"]
-        else:
-            cmd = ["revert"] + list(files)
-        self.hg_command(*cmd)
+        hard = ["--hard"] if hard else []
+        cmd = ["reset"] + hard + list(files)
+        self.git_command(*cmd)
 
-    def hg_node(self):
+    def git_node(self):
         """Get the full node id of the current revision"""
-        res = self.hg_command("log", "-r", self.hg_id(), "--template", "{node}")
+        res = self.git_command("log", "-r", self.git_id(), "--template", "{node}")
         return res.strip()
 
-    def hg_commit(self, message, user=None, files=[], close_branch=False):
+    def git_commit(self, message, user=None, files=[], close_branch=False):
         """Commit changes to the repository."""
-        userspec = "-u" + user if user else "-u" + self.user if self.user else ""
+        userspec = ("--author='" + user + "'" if user else 
+                    "--author=" + self.user if self.user else "")
         close = "--close-branch" if close_branch else ""
-        self.hg_command("commit", "-m", message, close, 
+        self.git_command("commit", "-m", message, close, 
                         userspec, *files)
 
-    def hg_log(self, identifier=None, limit=None, template=None, **kwargs):
+    def git_log(self, identifier=None, limit=None, template=None, **kwargs):
         """Get repositiory log"""
         cmds = ["log"]
-        if identifier: cmds += ['-r', str(identifier)]
-        if limit: cmds += ['-l', str(limit)]
-        if template: cmds += ['--template', str(template)]
+        if identifier: cmds += [identifier, '-n', '1']
+        if limit: cmds += ['-n', str(limit)]
+        if template: cmds += [str(template)]
         if kwargs:
             for key in kwargs:
                 cmds += [key, kwargs[key]]
-        return self.hg_command(*cmds)
+        return self.git_command(*cmds)
         
-    def hg_status(self, empty=False):
+    def git_status(self, empty=False):
         """Get repository status.
         Returns a dict containing a *change char* -> *file list* mapping, where 
         change char is in::
@@ -146,35 +148,34 @@ class Repo(object):
 
         If empty is set to non-False value, don't add empty lists
         """
-        cmds = ['status']
-        out = self.hg_command(*cmds).strip()
+        out = self.git_command('status', '-s').strip()
         #default empty set
         if empty:
             changes = {}
         else:
-            changes = {'A': [], 'M': [], '!': [], '?': [], 'R': []}
+            changes = {}
         if not out: return changes
         lines = out.split("\n")
-        status_split = re.compile("^(.) (.*)$")
+        status_split = re.compile("^([^\s]+)\s+(.*)$")
 
-        for change, path in [status_split.match(x).groups() for x in lines]:
+        for change, path in [status_split.match(x.strip()).groups() for x in lines]:
             changes.setdefault(change, []).append(path)
         return changes
         
-    rev_log_tpl = '\{"node":"{node|short}","rev":"{rev}","author":"{author|urlescape}","branch":"{branch}", "parents":"{parents}","date":"{date|isodate}","tags":"{tags}","desc":"{desc|urlescape}"}'        
+    rev_log_tpl = '--pretty=format:{"node":"%h","author":"%an", "parents":"%p","date":"%ci","desc":"%f"}'
 
     def revision(self, identifier):
         """Get the identified revision as a Revision object"""
-        out = self.hg_log(identifier=str(identifier), 
+        out = self.git_log(identifier=identifier, 
                           template=self.rev_log_tpl)
         
         return Revision(out)
 
     def read_config(self):
-        """Read the configuration as seen with 'hg showconfig'
+        """Read the configuration as seen with 'git config -l'
         Is called by __init__ - only needs to be called explicitly
         to reflect changes made since instantiation"""
-        res = self.hg_command("showconfig")
+        res = self.git_command("config", "-l")
         cfg = {}
         for row in res.split("\n"):
             section, ign, value = row.partition("=")
