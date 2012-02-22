@@ -1,57 +1,39 @@
-hgapi
+gitapi
 =====
-hgapi is a pure-Python API to Mercurial, that uses the command-line
-interface instead of the internal Mercurial API. The rationale for
-this is twofold: the internal API is unstable, and it is GPL.
-
-hgapi works for Mercurial < 1.9, and will instantly reflect any
-changes to the repository, unlike interfaces based on the
-CommandServer (http://mercurial.selenic.com/wiki/CommandServer). It
-also has a really permissive license (do whatever you want, don't
+gitapi is a pure-Python API to git, which uses the command-line
+interface. It has a really permissive license (do whatever you want, don't
 blame me).
-
-For example of code that uses this API, take a look at
-https://bitbucket.org/haard/autohook which now uses hgapi
-exclusively. Add any feature requests or bugs found to the issue tracker.
 
 So far, the API supports::
 
- hg init
- hg id
- hg add <file>
- hg commit [files] [-u name] [--close-branch]
- hg update <rev>
- hg heads
- hg log
- hg remove
- hg status
- hg merge (fails on conflict)
- hg revert
+ git init
+ git branch
+ git id (git log --pretty=format:%H)
+ git add
+ git commit
+ git status
+ git log
+ git checkout
+ git reset
+ git merge (fails on conflict)
+
 
 You also have access to the configuration (config, configbool,
-configlist) just as in the internal Mercurial API.
+configlist).
 
 Example usage::
-    >>> import hgapi
-    >>> repo = hgapi.Repo("test_hgapi") #existing folder
-    >>> repo.hg_init()
-    >>> repo.hg_add("file.txt") #already created but not added file
-    >>> repo.hg_commit("Adding file.txt", user="me")
+    >>> import gitapi
+    >>> repo = gitapi.Repo("test_gitapi") #existing folder
+    >>> repo.git_init()
+    >>> repo.git_add("file.txt") #already created but not added file
+    >>> repo.git_commit("Adding file.txt", user="me <me@example.com>")
     >>> str(repo['tip'].desc)
     'Adding file.txt'
 
 Installation
 ============
 
-Easiest is easy_install or pip from PyPy::
-
- pip install hgapi
-
-or::
-
- easy_install hgapi
-
-Otherwise, download the source, make sure you have setuptools
+Download the source, make sure you have setuptools
 installed, and then run::
 
  python setup.py install
