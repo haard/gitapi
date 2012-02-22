@@ -1,5 +1,5 @@
 gitapi
-=====
+======
 gitapi is a pure-Python API to git, which uses the command-line
 interface. It has a really permissive license (do whatever you want, don't
 blame me).
@@ -41,7 +41,7 @@ installed, and then run::
 License
 =======
 
-Copyright (c) 2011, Fredrik Håård 
+Copyright (c) Fredrik Håård 
 
 Do whatever you want, don't blame me. You may also use this software
 as licensed under the MIT or BSD licenses, or the more permissive license below:
