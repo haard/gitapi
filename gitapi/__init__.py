@@ -1,4 +1,4 @@
-"""Python API to Mercurial, without using the internal Mercurial API
+"""Python API to Git
 """
-import hgapi as _hgapi
-Repo = _hgapi.Repo
+import gitapi.gitapi as _gitapi
+Repo = _gitapi.Repo
