@@ -33,7 +33,7 @@ class TestGitAPI(unittest.TestCase):
 
 #        gitid = self.repo.git_id()
 
- #       self.assertEquals("000000000000", gitid)
+#       self.assertEquals("000000000000", gitid)
 
     def test_020_Add(self):
         with open("test/file.txt", "w") as out:
