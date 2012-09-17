@@ -1,7 +1,15 @@
 from __future__ import with_statement
 import unittest, doctest
 import os, shutil, os.path
-import gitapi 
+import gitapi
+import stat
+
+def onfserror(delegate, path, exec_info):
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        delegate(path)
+    else:
+        raise
 
 class TestGitAPI(unittest.TestCase):
     """Tests for gitapi.py
@@ -17,13 +25,13 @@ class TestGitAPI(unittest.TestCase):
             setattr(cls, "assertEquals", cls.assertEqual)
             setattr(cls, "assertNotEquals", cls.assertNotEqual)
         if os.path.exists("./test"):
-            shutil.rmtree("./test")
+            shutil.rmtree("./test", onerror=onfserror)
         os.mkdir("./test")
         assert os.path.exists("./test")
 
     @classmethod
     def tearDownClass(self):
-        shutil.rmtree("test")
+        shutil.rmtree("test", onerror=onfserror)
 
     def test_005_Init(self):
         self.repo.git_init()
