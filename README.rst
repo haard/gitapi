@@ -16,6 +16,10 @@ So far, the API supports::
  git checkout
  git reset
  git merge (fails on conflict)
+ git push
+ git pull
+ git fetch
+ git clone
 
 
 You also have access to the configuration (config, configbool,
