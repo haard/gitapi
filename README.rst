@@ -27,7 +27,7 @@ Example usage::
     >>> repo.git_init()
     >>> repo.git_add("file.txt") #already created but not added file
     >>> repo.git_commit("Adding file.txt", user="me <me@example.com>")
-    >>> str(repo['tip'].desc)
+    >>> str(repo['HEAD'].desc)
     'Adding file.txt'
 
 Installation

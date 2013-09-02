@@ -13,35 +13,42 @@ def onfserror(delegate, path, exec_info):
 
 class TestGitAPI(unittest.TestCase):
     """Tests for gitapi.py
-    Uses and wipes subfolder named 'test'
+    Uses and wipes subfolder named 'test' and 'test-clone'
     Tests are dependant on each other; named test_<number>_name for sorting
     """
     repo = gitapi.Repo("./test", user="Testuser <test@example.com>")
-    
+    clone = gitapi.Repo("./test-clone", user="Testuser <test@example.com>")
+    bareclone = gitapi.Repo("./test-clone-bare", user="Testuser <test@example.com>")
+
+
+    @classmethod
+    def _delete_and_create(cls, path):
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        os.mkdir(path)
+        assert os.path.exists(path)
+
     @classmethod
     def setUpClass(cls):
-        #Patch Python 3
+        # patch for Python 3
         if hasattr(cls, "assertEqual"):
             setattr(cls, "assertEquals", cls.assertEqual)
             setattr(cls, "assertNotEquals", cls.assertNotEqual)
-        if os.path.exists("./test"):
-            shutil.rmtree("./test", onerror=onfserror)
-        os.mkdir("./test")
-        assert os.path.exists("./test")
+        TestGitAPI._delete_and_create("./test")
+        TestGitAPI._delete_and_create("./test-clone")
+        TestGitAPI._delete_and_create("./test-clone-bare")
+
 
     @classmethod
     def tearDownClass(self):
-        shutil.rmtree("test", onerror=onfserror)
+        shutil.rmtree("test", ignore_errors=True)
+        shutil.rmtree("test-clone", ignore_errors=True)
+        shutil.rmtree("test-clone-bare", ignore_errors=True)
 
     def test_005_Init(self):
         self.repo.git_init()
         self.assertTrue(os.path.exists("test/.git"))
 
-    #def test_040_Identity(self):
-
-#        gitid = self.repo.git_id()
-
-#       self.assertEquals("000000000000", gitid)
 
     def test_020_Add(self):
         with open("test/file.txt", "w") as out:
@@ -174,7 +181,43 @@ class TestGitAPI(unittest.TestCase):
         with open("test/file3.txt", "r") as src:
             self.assertEqual(src.read(), "this is more stuff")
 
-        
+    def test_300_clone(self):
+        # clone test to test clone
+        self.clone = gitapi.Repo.git_clone("./test", "./test-clone")
+        self.assertTrue(isinstance(self.clone, gitapi.Repo))
+        self.assertEquals(self.clone.path, self.repo.path + "-clone")
+
+    def test_310_pull(self):
+        # add a new directory with some files in test repo first
+        os.mkdir("./test/cities")
+        with open("./test/cities/brussels.txt", "w") as out:
+            out.write("brussel")
+        with open("./test/cities/antwerp.txt", "w") as out:
+            out.write("antwerpen")
+        self.repo.git_add("cities")
+        message = "[TEST] Added two cities."
+        self.repo.git_commit(message)
+        self.clone.git_pull("../test")
+
+        self.assertEquals(self.clone.git_id(), self.repo.git_id())
+        # check summary of pulled tip
+        self.assertTrue(message in self.clone.git_log(identifier="HEAD"))
+
+    def test_320_push(self):
+        #Make a bare clone of test
+        gitapi.Repo.git_clone('test', 'test-clone-bare', '--bare')
+        # add another file in test-clone first
+        with open("./test-clone/cities/ghent.txt", "w") as out:
+            out.write("gent")
+        self.clone.git_add('cities')
+        message = "[CLONE] Added one file."
+        self.clone.git_commit(message)
+        self.clone.git_push("../test-clone-bare")
+
+        self.assertEquals(self.clone.git_id(), self.bareclone.git_id())
+        # check summary of pushed tip
+        self.assertTrue(message in self.bareclone.git_log(identifier="HEAD"))
+      
 
 def test_doc():
     #Prepare for doctest

@@ -13,6 +13,13 @@ except:
     import simplejson as json
 
 
+class GitException(Exception):
+    """Exception class allowing a exit_code parameter and member
+    to be used when calling Git to return exit code"""
+    def __init__(self, msg, exit_code=None):
+        super(GitException, self).__init__(msg)
+        self.exit_code = exit_code
+        
 class Revision(object):
     """A representation of a revision.
     Available fields are::
@@ -23,7 +30,6 @@ class Revision(object):
     """
     def __init__(self, json_log):
         """Create a Revision object from a JSON representation"""
-        print(json_log)
         rev = json.loads(json_log)
         
         for key in rev.keys():
@@ -50,21 +56,24 @@ class Repo(object):
         """Get a Revision object for the revision identifed by rev"""
         return self.revision(rev)
 
-    def git_command(self, *args):
-        """Run a git command in path and return the result.
-        Throws on error."""    
-
-        allargs = ["--git-dir", self.path+"/.git", "--work-tree", self.path] + list(args)
-        proc = Popen(["git"] + allargs, stdout=PIPE, stderr=PIPE)
-        print("Executed " + " ".join(allargs))
-
+    @classmethod
+    def command(cls, path, *args):
+        """Run a git command in path and return the result. Throws on error."""
+        if not path:
+            path = '.'
+        proc = Popen(["git"] + list(args), stdout=PIPE, stderr=PIPE, cwd=path)
+  
         out, err = [x.decode("utf-8") for x in  proc.communicate()]
 
         if proc.returncode:
-            cmd = "git " + " ".join(allargs)
-            raise Exception("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" 
-                            % (cmd,err,out,proc.returncode))
+            cmd = "git " + " ".join(args)
+            raise GitException("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" 
+                            % (cmd,err,out,proc.returncode), exit_code=proc.returncode)
         return out
+    def git_command(self, *args):
+        """Run a git command on this repo and return the result.
+        Throws on error."""    
+        return Repo.command(self.path, *args)   
 
     def git_init(self):
         """Initialize a new repo"""
@@ -161,8 +170,36 @@ class Repo(object):
         for change, path in [status_split.match(x.strip()).groups() for x in lines]:
             changes.setdefault(change, []).append(path)
         return changes
+
+    def git_push(self, destination=None):
+        """Push changes from this repo."""
+        if destination is None:
+            self.git_command("push")
+        else:
+            self.git_command("push", destination)
+
+    def git_pull(self, source=None):
+        """Pull changes to this repo."""
+        if source is None:
+            self.git_command("pull")
+        else:
+            self.git_command("pull", source)
+
+    def git_fetch(self, source=None):
+        """Fetch changes to this repo."""
+        if source is None:
+            self.git_command("fetch")
+        else:
+            self.git_command("fetch", source)
+
+    @classmethod
+    def git_clone(cls, url, path, *args):
+        """Clone repository at given `url` to `path`,
+        then return repo object to `path`."""
+        Repo.command(None, "clone", url, path, *args)
+        return Repo(path)
         
-    rev_log_tpl = '--pretty=format:{"node":"%h","author":"%an", "parents":"%p","date":"%ci","desc":"%f"}'
+    rev_log_tpl = '--pretty=format:{"node":"%h","author":"%an", "parents":"%p","date":"%ci","desc":"%s"}'
 
     def revision(self, identifier):
         """Get the identified revision as a Revision object"""
