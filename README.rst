@@ -37,7 +37,11 @@ Example usage::
 Installation
 ============
 
-Download the source, make sure you have setuptools
+Super easy::
+
+ pip install gitapi
+
+Easy: download the source, make sure you have setuptools
 installed, and then run::
 
  python setup.py install
