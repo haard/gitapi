@@ -171,12 +171,11 @@ class Repo(object):
             changes.setdefault(change, []).append(path)
         return changes
 
-    def git_push(self, destination=None):
+    def git_push(self, destination=None, branch=None):
         """Push changes from this repo."""
-        if destination is None:
-            self.git_command("push")
-        else:
-            self.git_command("push", destination)
+        args = [arg for arg in (destination, branch) if not arg is None]
+        self.git_command("push", *args)
+
 
     def git_pull(self, source=None):
         """Pull changes to this repo."""
