@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = "gitapi",
-    version = "1.0.0",
+    version = "1.0.1a1",
     packages = ['gitapi'],
     test_suite = "gitapi.testgitapi.TestGitAPI",
     author = "Fredrik Håård",
