@@ -108,7 +108,7 @@ class Repo(object):
     def git_branch(self, name, start="HEAD"):
         """Create the branch named 'name'"""
         return self.git_command("branch", name, start)
-        
+
     def git_merge(self, reference):
         """Merge reference to current"""
         self.git_command("merge", reference)
@@ -220,7 +220,6 @@ class Repo(object):
             sect_cfg[sub] = value.strip()
         self.cfg = cfg
         return cfg
-
 
     def config(self, section, key):
         """Return the value of a configuration variable"""
