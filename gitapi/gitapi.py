@@ -20,7 +20,7 @@ class GitException(Exception):
         super(GitException, self).__init__(msg)
         self.exit_code = exit_code
         
-        
+
 class Revision(object):
     """A representation of a revision.
     Available fields are::
@@ -108,9 +108,7 @@ class Repo(object):
     def git_branch(self, name, start="HEAD"):
         """Create the branch named 'name'"""
         return self.git_command("branch", name, start)
-
-
-
+        
     def git_merge(self, reference):
         """Merge reference to current"""
         self.git_command("merge", reference)
