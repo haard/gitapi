@@ -20,6 +20,7 @@ class GitException(Exception):
         super(GitException, self).__init__(msg)
         self.exit_code = exit_code
         
+        
 class Revision(object):
     """A representation of a revision.
     Available fields are::
@@ -43,6 +44,7 @@ class Revision(object):
     def __eq__(self, other):
         """Returns true if self.node == other.node"""
         return self.node == other.node
+
 
 class Repo(object):
     """A representation of a Mercurial repository"""
@@ -70,6 +72,7 @@ class Repo(object):
             raise GitException("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" 
                             % (cmd,err,out,proc.returncode), exit_code=proc.returncode)
         return out
+
     def git_command(self, *args):
         """Run a git command on this repo and return the result.
         Throws on error."""    
