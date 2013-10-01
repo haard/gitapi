@@ -20,6 +20,7 @@ class GitException(Exception):
         super(GitException, self).__init__(msg)
         self.exit_code = exit_code
         
+
 class Revision(object):
     """A representation of a revision.
     Available fields are::
@@ -43,6 +44,7 @@ class Revision(object):
     def __eq__(self, other):
         """Returns true if self.node == other.node"""
         return self.node == other.node
+
 
 class Repo(object):
     """A representation of a Mercurial repository"""
@@ -70,6 +72,7 @@ class Repo(object):
             raise GitException("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" 
                             % (cmd,err,out,proc.returncode), exit_code=proc.returncode)
         return out
+
     def git_command(self, *args):
         """Run a git command on this repo and return the result.
         Throws on error."""    
@@ -106,7 +109,14 @@ class Repo(object):
         """Create the branch named 'name'"""
         return self.git_command("branch", name, start)
 
+    def git_tags(self):
+        """Gets a list with the names of all tags"""
+        res = self.git_command("tag")
+        return [tag for tag in res.split("\n") if tag]
 
+    def git_tag(self, name):
+        """Create the tag named 'name'"""
+        return self.git_command("tag", name)
 
     def git_merge(self, reference):
         """Merge reference to current"""
@@ -219,7 +229,6 @@ class Repo(object):
             sect_cfg[sub] = value.strip()
         self.cfg = cfg
         return cfg
-
 
     def config(self, section, key):
         """Return the value of a configuration variable"""
