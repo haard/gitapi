@@ -212,7 +212,7 @@ class TestGitAPI(unittest.TestCase):
         self.clone.git_add('cities')
         message = "[CLONE] Added one file."
         self.clone.git_commit(message)
-        self.clone.git_push("../test-clone-bare")
+        self.clone.git_push("../test-clone-bare", branch="master")
 
         self.assertEquals(self.clone.git_id(), self.bareclone.git_id())
         # check summary of pushed tip
