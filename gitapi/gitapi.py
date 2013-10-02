@@ -109,12 +109,16 @@ class Repo(object):
         """Create the branch named 'name'"""
         return self.git_command("branch", name, start)
 
-    def git_tags(self, points_at=None):
-        """Gets a list with the names of all tags"""
+    def git_tags(self, pattern=None, points_at=None, **kwargs):
+        """Get repository tags"""
         args = []
+        for key in kwargs:
+            args.extend([key, kwargs[key]])
         if points_at:
             args.extend(['--points-at', points_at])
-        res = self.git_command("tag", *args)
+        if template:
+            args.append(template)
+        res = self.git_command("tag", "-l", *args)
         return [tag for tag in res.split("\n") if tag]
 
     def git_tag(self, name):
