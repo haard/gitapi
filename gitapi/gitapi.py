@@ -116,8 +116,8 @@ class Repo(object):
             args.extend([key, kwargs[key]])
         if points_at:
             args.extend(['--points-at', points_at])
-        if template:
-            args.append(template)
+        if pattern:
+            args.append(pattern)
         res = self.git_command("tag", "-l", *args)
         return [tag for tag in res.split("\n") if tag]
 
