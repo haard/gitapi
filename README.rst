@@ -20,7 +20,8 @@ So far, the API supports::
  git pull
  git fetch
  git clone
-
+ git tags
+ git tag
 
 You also have access to the configuration (config, configbool,
 configlist).
