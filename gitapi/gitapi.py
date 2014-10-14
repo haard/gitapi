@@ -19,7 +19,7 @@ class GitException(Exception):
     def __init__(self, msg, exit_code=None):
         super(GitException, self).__init__(msg)
         self.exit_code = exit_code
-        
+
 
 class Revision(object):
     """A representation of a revision.
@@ -32,10 +32,10 @@ class Revision(object):
     def __init__(self, json_log):
         """Create a Revision object from a JSON representation"""
         rev = json.loads(json_log)
-        
+
         for key in rev.keys():
             self.__setattr__(key, unquote(rev[key]))
-   
+
         if not self.parents:
             self.parents = []
         else:
@@ -64,19 +64,19 @@ class Repo(object):
         if not path:
             path = '.'
         proc = Popen(["git"] + list(args), stdout=PIPE, stderr=PIPE, cwd=path)
-  
+
         out, err = [x.decode("utf-8") for x in  proc.communicate()]
 
         if proc.returncode:
             cmd = "git " + " ".join(args)
-            raise GitException("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s" 
+            raise GitException("Error running %s:\n\tErr: %s\n\tOut: %s\n\tExit: %s"
                             % (cmd,err,out,proc.returncode), exit_code=proc.returncode)
         return out
 
     def git_command(self, *args):
         """Run a git command on this repo and return the result.
-        Throws on error."""    
-        return Repo.command(self.path, *args)   
+        Throws on error."""
+        return Repo.command(self.path, *args)
 
     def git_init(self):
         """Initialize a new repo"""
@@ -86,7 +86,7 @@ class Repo(object):
         """Get the output of the git id command (truncated node)"""
         res = self.git_command("log","--pretty=format:%H", "-n", "1")
         return res.strip("\n +")
-        
+
     def git_add(self, filepath):
         """Add a file to the repo"""
         self.git_command("add", filepath)
@@ -95,9 +95,12 @@ class Repo(object):
         """Remove a file from the repo"""
         self.git_command("rm", filepath)
 
-    def git_checkout(self, reference, clean=False):
-        """Update to the revision indetified by reference"""
-        cmd = ["checkout", str(reference)]
+    def git_checkout(self, reference, branch=False):
+        """Checkout the revision indetified by reference"""
+        cmd = ["checkout"]
+        if branch:
+            cmd.append('-b')
+        cmd.append(str(reference))
         self.git_command(*cmd)
 
     def git_branches(self):
@@ -128,10 +131,10 @@ class Repo(object):
     def git_merge(self, reference):
         """Merge reference to current"""
         self.git_command("merge", reference)
-        
+
     def git_reset(self, hard=True, *files):
         """Revert repository"""
-        
+
         hard = ["--hard"] if hard else []
         cmd = ["reset"] + hard + list(files)
         self.git_command(*cmd)
@@ -145,7 +148,7 @@ class Repo(object):
         """Commit changes to the repository."""
         userspec = (['--author', user] if user else ['--author', self.user] if self.user else [])
         close = "--close-branch" if close_branch else ""
-        self.git_command("commit", "-m", message, close, 
+        self.git_command("commit", "-m", message, close,
                         *userspec + files)
 
     def git_log(self, identifier=None, limit=None, template=None, **kwargs):
@@ -158,10 +161,10 @@ class Repo(object):
             for key in kwargs:
                 cmds += [key, kwargs[key]]
         return self.git_command(*cmds)
-        
+
     def git_status(self, empty=False):
         """Get repository status.
-        Returns a dict containing a *change char* -> *file list* mapping, where 
+        Returns a dict containing a *change char* -> *file list* mapping, where
         change char is in::
 
          A, M, R, !, ?
@@ -179,7 +182,8 @@ class Repo(object):
             changes = {}
         else:
             changes = {}
-        if not out: return changes
+            if not out:
+                return changes
         lines = out.split("\n")
         status_split = re.compile("^([^\s]+)\s+(.*)$")
 
@@ -189,16 +193,18 @@ class Repo(object):
 
     def git_push(self, destination=None, branch=None):
         """Push changes from this repo."""
-        args = [arg for arg in (destination, branch) if not arg is None]
+        args = [arg for arg in (destination, branch)
+                if arg is not None]
         self.git_command("push", *args)
 
-
-    def git_pull(self, source=None):
+    def git_pull(self, source=None, rebase=False):
         """Pull changes to this repo."""
-        if source is None:
-            self.git_command("pull")
-        else:
-            self.git_command("pull", source)
+        args = []
+        if rebase:
+            args.append('--rebase')
+        if source:
+            args.append(source)
+        self.git_command("pull", *args)
 
     def git_fetch(self, source=None):
         """Fetch changes to this repo."""
@@ -213,14 +219,14 @@ class Repo(object):
         then return repo object to `path`."""
         Repo.command(None, "clone", url, path, *args)
         return Repo(path)
-        
+
     rev_log_tpl = '--pretty=format:{"node":"%h","author":"%an", "parents":"%p","date":"%ci","desc":"%s"}'
 
     def revision(self, identifier):
         """Get the identified revision as a Revision object"""
-        out = self.git_log(identifier=identifier, 
+        out = self.git_log(identifier=identifier,
                           template=self.rev_log_tpl)
-        
+
         return Revision(out)
 
     def read_config(self):
@@ -239,32 +245,32 @@ class Repo(object):
 
     def config(self, section, key):
         """Return the value of a configuration variable"""
-        if not self.cfg: 
+        if not self.cfg:
             self.cfg = self.read_config()
         return self.cfg.get(section, {}).get(key, None)
-    
+
     def configbool(self, section, key):
         """Return a config value as a boolean value.
         Empty values, the string 'false' (any capitalization),
         and '0' are considered False, anything else True"""
-        if not self.cfg: 
+        if not self.cfg:
             self.cfg = self.read_config()
         value = self.cfg.get(section, {}).get(key, None)
-        if not value: 
+        if not value:
             return False
-        if (value == "0" 
+        if (value == "0"
             or value.upper() == "FALSE"
-            or value.upper() == "None"): 
+            or value.upper() == "None"):
             return False
         return True
 
     def configlist(self, section, key):
         """Return a config value as a list; will try to create a list
         delimited by commas, or whitespace if no commas are present"""
-        if not self.cfg: 
+        if not self.cfg:
             self.cfg = self.read_config()
         value = self.cfg.get(section, {}).get(key, None)
-        if not value: 
+        if not value:
             return []
         if value.count(","):
             return value.split(",")

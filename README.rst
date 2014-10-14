@@ -50,7 +50,7 @@ installed, and then run::
 License
 =======
 
-Copyright (c) Fredrik Håård 
+Copyright (c) Fredrik Håård
 
 Do whatever you want, don't blame me. You may also use this software
 as licensed under the MIT or BSD licenses, or the more permissive license below:
