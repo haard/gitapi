@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
 
-
 setup(
     name = "gitapi",
-    version = "1.0.1a2",
+    version = "1.0.1",
     packages = ['gitapi'],
     test_suite = "gitapi.testgitapi.TestGitAPI",
     author = "Fredrik Håård",
