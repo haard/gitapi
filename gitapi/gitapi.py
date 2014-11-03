@@ -124,9 +124,12 @@ class Repo(object):
         res = self.git_command("tag", "-l", *args)
         return [tag for tag in res.split("\n") if tag]
 
-    def git_tag(self, name):
+    def git_tag(self, name, message, annotated=False, reference=None):
         """Create the tag named 'name'"""
-        return self.git_command("tag", name)
+        args = [x for x in (name, '-m', message,
+                            '-a' if annotated else None, reference) if x]
+
+        return self.git_command("tag", *args)
 
     def git_merge(self, reference):
         """Merge reference to current"""

@@ -54,7 +54,7 @@ class TestGitAPI(unittest.TestCase):
         with open("test/file.txt", "w") as out:
             out.write("stuff")
         self.repo.git_add("file.txt")
-        
+
     def test_030_Commit(self):
         #Commit and check that we're on a real revision
         self.repo.git_commit("adding", user="test <test@example.com>")
@@ -81,7 +81,7 @@ class TestGitAPI(unittest.TestCase):
 
     def test_050_Checkout(self):
         node = self.repo.git_id()
-        
+
         self.repo.git_checkout('HEAD~1')
         self.assertNotEquals(self.repo.git_id(), node)
         self.repo.git_checkout(node)
@@ -96,32 +96,32 @@ class TestGitAPI(unittest.TestCase):
                   ("test.stuff.list", "one two three")):
             self.repo.git_command("config", key, value)
         #re-read config
-        self.repo.read_config()     
+        self.repo.read_config()
         self.assertEquals(self.repo.config('test', 'stuff.otherstuff'),
                           "tsosvalue")
 
     def test_071_ConfigBool(self):
         self.assertTrue(self.repo.configbool('test', 'stuff.debug'))
         self.assertFalse(self.repo.configbool('test', 'stuff.verbose'))
-        
+
     def test_072_ConfigList(self):
         self.assertTrue(self.repo.configlist('test', 'stuff.list'),
                         ["one", "two", "three"])
-  
+
 
     def test_090_ModifiedStatus(self):
         #write some more to file
         with open("test/file.txt", "a") as out:
             out.write("stuff stuff stuff")
         status = self.repo.git_status()
-        self.assertEquals(status, 
+        self.assertEquals(status,
                           {'M': ['file.txt']})
-        
+
     def test_100_CleanStatus(self):
         #commit file created in 090
         self.repo.git_commit("Comitting changes", user="Test <test@example.com>")
         #Assert status is empty
-        self.assertEquals(self.repo.git_status(), 
+        self.assertEquals(self.repo.git_status(),
                           {})
 
     def test_110_UntrackedStatus(self):
@@ -129,14 +129,14 @@ class TestGitAPI(unittest.TestCase):
         with open("test/file2.txt", "w") as out:
             out.write("stuff stuff stuff")
         status = self.repo.git_status()
-        self.assertEquals(status, 
+        self.assertEquals(status,
                           {'??': ['file2.txt']})
 
     def test_120_AddedStatus(self):
         #Add file created in 110
         self.repo.git_add("file2.txt")
         status = self.repo.git_status()
-        self.assertEquals(status, 
+        self.assertEquals(status,
                           {'A': ['file2.txt']})
 
     def test_130_MissingStatus(self):
@@ -145,14 +145,14 @@ class TestGitAPI(unittest.TestCase):
         import os
         os.unlink("test/file2.txt")
         status = self.repo.git_status()
-        self.assertEquals(status, 
+        self.assertEquals(status,
                           {'D': ['file2.txt']})
 
     def test_140_RemovedStatus(self):
         #Remove file from repo
         self.repo.git_remove("file2.txt")
         status = self.repo.git_status()
-        self.assertEquals(status, 
+        self.assertEquals(status,
                           {'D': ['file2.txt']})
 
     def test_140_EmptyStatus(self):
@@ -163,7 +163,7 @@ class TestGitAPI(unittest.TestCase):
     def test_150_ForkAndMerge(self):
         #Store this version
         node = self.repo.git_id()
-        
+
         #creates new branch
         self.repo.git_branch("test", "HEAD~2")
         self.repo.git_checkout("test")
@@ -217,7 +217,10 @@ class TestGitAPI(unittest.TestCase):
         self.assertEquals(self.clone.git_id(), self.bareclone.git_id())
         # check summary of pushed tip
         self.assertTrue(message in self.bareclone.git_log(identifier="HEAD"))
-      
+
+    def test_330_tag(self):
+        self.repo.git_tag('testtag', 'message', annotated=True)
+        self.assertEquals(self.repo.git_tags(), ['testtag'])
 
 def test_doc():
     #Prepare for doctest
@@ -237,4 +240,3 @@ if __name__ == "__main__":
         test_doc()
     finally:
         unittest.main()
-    
