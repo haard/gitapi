@@ -126,8 +126,8 @@ class Repo(object):
 
     def git_tag(self, name, message, annotated=False, reference=None):
         """Create the tag named 'name'"""
-        args = [x for x in (name, '-m', message,
-                            '-a' if annotated else None, reference) if x]
+        args = [x for x in ('-m', message, '-a' if annotated else None,
+                            name, reference) if x]
 
         return self.git_command("tag", *args)
 
